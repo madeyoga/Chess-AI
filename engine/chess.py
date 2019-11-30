@@ -1,5 +1,6 @@
 from pygai.base import AbstractBoard
 import pygame
+from itertools import product
 
 class Piece:
     def __init__(self, value=0, size=(97, 97)):
@@ -88,26 +89,226 @@ class King(Piece):
     def __init__(self, value=40):
         super().__init__(value)
         self.set_image("./asset/chess-king" + self.image_postfix)
+    
+    def get_available_moves(self, board):
+        i, j = self.index
+        available_moves = []
+
+        # Diagonals
+        if i - 1 >= 0 and i - 1 < 8 and j - 1 >= 0 and j - 1 < 8 and (board[i - 1][j - 1] == 0 or (board[i - 1][j - 1] != 0 and board[i - 1][j - 1].color != self.color)):
+            available_moves.append((i - 1, j - 1))
+        if i + 1 >= 0 and i + 1 < 8 and j + 1 >= 0 and j + 1 < 8 and (board[i + 1][j + 1] == 0 or (board[i + 1][j + 1] != 0 and board[i + 1][j + 1].color != self.color)):
+            available_moves.append((i + 1, j + 1))
+        if i - 1 >= 0 and i - 1 < 8 and j + 1 >= 0 and j + 1 < 8 and (board[i - 1][j + 1] == 0 or (board[i - 1][j + 1] != 0 and board[i - 1][j + 1].color != self.color)):
+            available_moves.append((i - 1, j + 1))
+        if i + 1 >= 0 and i + 1 < 8 and j - 1 >= 0 and j - 1 < 8 and (board[i + 1][j - 1] == 0 or (board[i + 1][j - 1] != 0 and board[i + 1][j - 1].color != self.color)):
+            available_moves.append((i + 1, j - 1))
+
+        # Vertical
+        if i - 1 >= 0 and i - 1 < 8 and j >= 0 and j < 8 and (board[i - 1][j] == 0 or (board[i - 1][j] != 0 and board[i - 1][j].color != self.color)):
+            available_moves.append((i - 1, j))
+        if i + 1 >= 0 and i + 1 < 8 and j >= 0 and j < 8 and (board[i + 1][j] == 0 or (board[i + 1][j] != 0 and board[i + 1][j].color != self.color)):
+            available_moves.append((i + 1, j))
+
+        # Horizontal
+        if i >= 0 and i < 8 and j + 1 >= 0 and j + 1 < 8 and (board[i][j + 1] == 0 or (board[i][j + 1] != 0 and board[i][j + 1].color != self.color)):
+            available_moves.append((i, j + 1))
+        if i >= 0 and i < 8 and j - 1 >= 0 and j - 1 < 8 and (board[i][j - 1] == 0 or (board[i][j - 1] != 0 and board[i][j - 1].color != self.color)):
+            available_moves.append((i, j - 1))
+
+        return available_moves
 
 class Queen(Piece):
     def __init__(self, value=9):
         super().__init__(value)
+        self.rook = Rook()
+
+        self.bishop = Bishop()
+
         self.set_image("./asset/chess-queen" + self.image_postfix)
+    
+    def get_available_moves(self, board):
+        available_moves = []
+
+        self.rook.index = self.index
+        moves_hv = self.rook.get_available_moves(board)
+
+        self.bishop.index = self.index
+        moves_diag = self.bishop.get_available_moves(board)
+
+        available_moves.extend(moves_hv)
+        available_moves.extend(moves_diag)
+        return available_moves
 
 class Rook(Piece):
     def __init__(self, value=5):
         super().__init__(value)
         self.set_image("./asset/chess-rook" + self.image_postfix)
+    
+    def get_available_moves(self, board):
+        """4 Directions Vertical & Horizontal"""
+
+        i, j = self.index
+        available_moves = []
+
+        # Vertical 
+        explore_i = i
+        while explore_i >= 0 and j >= 0 and explore_i < 8 and j < 8:
+            explore_i += 1
+            if explore_i >= 0 and explore_i < 8:
+                if board[explore_i][j] == 0:
+                    available_moves.append((explore_i, j))
+                    continue
+                if board[explore_i][j] != 0 and board[explore_i][j].color != self.color:
+                    available_moves.append((explore_i, j))
+                    break
+                else:
+                    break
+
+        explore_i = i
+        while explore_i >= 0 and j >= 0 and explore_i < 8 and j < 8:
+            explore_i -= 1
+            if explore_i >= 0 and explore_i < 8:
+                if board[explore_i][j] == 0:
+                    available_moves.append((explore_i, j))
+                    continue
+                if board[explore_i][j] != 0 and board[explore_i][j].color != self.color:
+                    available_moves.append((explore_i, j))
+                    break
+                else:
+                    break
+
+        # Horizontal
+        explore_j = j
+        while i >= 0 and explore_j >= 0 and i < 8 and explore_j < 8:
+            explore_j += 1
+            if explore_j >= 0 and explore_j < 8:
+                if board[i][explore_j] == 0:
+                    available_moves.append((i, explore_j))
+                    continue
+                if board[i][explore_j] != 0 and board[i][explore_j].color != self.color:
+                    available_moves.append((i, explore_j))
+                    break
+                else:
+                    break
+        
+        explore_j = j
+        while i >= 0 and explore_j >= 0 and i < 8 and explore_j < 8:
+            explore_j -= 1
+            if explore_j >= 0 and explore_j < 8:
+                if board[i][explore_j] == 0:
+                    available_moves.append((i, explore_j))
+                    continue
+                if board[i][explore_j] != 0 and board[i][explore_j].color != self.color:
+                    available_moves.append((i, explore_j))
+                    break
+                else:
+                    break
+
+        return available_moves
 
 class Bishop(Piece):
     def __init__(self, value=3):
         super().__init__(value)
         self.set_image("./asset/chess-bishop" + self.image_postfix)
 
+    def get_available_moves(self, board):
+        # \   /
+        #  \ / Diagonals
+        available_moves = []
+        i, j = self.index
+        
+        # diagonal \
+        explore_i = i + 1
+        explore_j = j + 1
+        if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
+            while board[explore_i][explore_j] == 0:
+                available_moves.append((explore_i, explore_j))
+                explore_i += 1
+                explore_j += 1
+                if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
+                    continue
+                else:
+                    break
+
+        try:
+            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color:
+                available_moves.append((explore_i, explore_j))
+        except:
+            pass
+
+        explore_i = i - 1
+        explore_j = j - 1
+        if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
+            while board[explore_i][explore_j] == 0:
+                available_moves.append((explore_i, explore_j))
+                explore_i -= 1
+                explore_j -= 1
+                if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
+                    continue
+                else:
+                    break
+
+        try:
+            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color:
+                available_moves.append((explore_i, explore_j))
+        except:
+            pass
+
+        # diagonal /
+        explore_i = i - 1
+        explore_j = j + 1
+        if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
+            print(explore_i, explore_j)
+            while board[explore_i][explore_j] == 0:
+                available_moves.append((explore_i, explore_j))
+                explore_i -= 1
+                explore_j += 1
+                if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
+                    continue
+                else:
+                    break
+        try:
+            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color:
+                available_moves.append((explore_i, explore_j))
+        except:
+            pass
+        
+        explore_i = i + 1
+        explore_j = j - 1
+        if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
+            while board[explore_i][explore_j] == 0:
+                available_moves.append((explore_i, explore_j))
+                explore_i += 1
+                explore_j -= 1
+                if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
+                    continue
+                else:
+                    break
+        try:
+            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color:
+                available_moves.append((explore_i, explore_j))
+        except:
+            pass
+
+        return available_moves
+
 class Knight(Piece):
     def __init__(self, value=3):
         super().__init__(value)
         self.set_image("./asset/chess-knight" + self.image_postfix)
+
+    def get_available_moves(self, board):
+        i, j = self.index
+        moves = list(product([i-1, i+1],[j-2, j+2])) + list(product([i-2,i+2],[j-1,j+1]))
+        available_moves = []
+        for i, j in moves:
+            if i >= 0 and j >= 0 and i < 8 and j < 8:
+                if board[i][j] == 0:
+                    available_moves.append((i, j))
+                if board[i][j] != 0 and board[i][j].color != self.color:
+                    available_moves.append((i, j))
+        return available_moves
 
 class ChessBoard(AbstractBoard):
     """
