@@ -21,6 +21,13 @@ def update_turn():
     else:
         turn = 0
 
+def is_valid_turn(piece_color, turn):
+    if piece_color == 'white' and turn == 0:
+        return True
+    if piece_color == 'black' and turn == 1:
+        return True
+    return False
+
 running = True
 while running:
     pygame.time.delay(30)
@@ -40,8 +47,11 @@ while running:
                     board.make_move(selected_piece.index, tri.move_index)
                     if selected_piece.value == 1 or selected_piece.value == -1:
                         selected_piece.never_moved = False
-                    break
                     
+                    # Game Logic
+                    update_turn()
+                    break
+
             if clicked_tri:
                 showed_tri.clear()
                 selected_piece_moves.clear()
@@ -49,7 +59,7 @@ while running:
                 break
 
             for piece in board.pieces:
-                if piece.is_clicked(event):
+                if piece.is_clicked(event) and is_valid_turn(piece.color, turn):
                     # indexes
                     selected_piece_moves = piece.get_available_moves(board.board)
                     selected_piece = piece
