@@ -6,6 +6,7 @@ class Piece:
         self.value = value
         self.surface = -1
         self.rect = -1
+        self.index = []
         self.position = pygame.Vector2(-1, -1)
         self.size = size
 
@@ -23,6 +24,11 @@ class Piece:
         return
 
     def set_position(self, pos):
+        """
+        pos::Coord2D (Column, Row) or (x, y) or (j, i)
+        """
+
+        self.index = [int(pos[1]), int(pos[0])]
         self.position = pos
         self.rect = pygame.Rect(self.position, self.size)
         return
@@ -127,11 +133,7 @@ class ChessBoard(AbstractBoard):
         ]
 
         # Initialize piece
-        for index_row, row in enumerate(self.board):
-            for index_column, piece in enumerate(row):
-                if type(piece).__name__ != 'int':
-                    piece.set_position(pygame.Vector2(index_column, index_row)) 
-                    self.pieces.append(piece)
+        self.update_pieces_list()
     
     def __str__(self):
         result = ""
@@ -152,6 +154,13 @@ class ChessBoard(AbstractBoard):
 
         self.surface = pygame.transform.scale(pygame.image.load(image_path), size)
     
+    def update_pieces_list(self):
+        for index_row, row in enumerate(self.board):
+            for index_column, piece in enumerate(row):
+                if type(piece).__name__ != 'int':
+                    piece.set_position(pygame.Vector2(index_column, index_row)) 
+                    self.pieces.append(piece)
+
     def make_move(self, origin, dest):
         """
         Make move on chessboard
@@ -161,16 +170,21 @@ class ChessBoard(AbstractBoard):
         dest0, dest1 = int(dest[0]), int(dest[1])
 
         # i,j = i,j 
-        temp_piece = self.board[ori1][ori0]
-
-        # i,j = y,x 
-        temp_piece.position = pygame.Vector2(dest1, dest0)
+        temp_piece = self.board[ori0][ori1]
         
+        # i,j = y,x, Converts Index to COORD
+        temp_piece.position = pygame.Vector2(dest1, dest0)
+        temp_piece.index = (dest0, dest1)
+
         # i,j = i,j 
         self.board[dest0][dest1] = temp_piece
         
         # i,j = i,j 
-        self.board[ori1][ori0] = 0
+        self.board[ori0][ori1] = 0
+
+        # Update these lines, to improve apps performance
+        self.pieces.clear()
+        self.update_pieces_list()
 
     def draw(self, win):
         """
