@@ -10,7 +10,7 @@ print(ai.get_decision('white'))
 exit()
 
 board.set_image('asset/board.png')
-
+ 
 win = pygame.display.set_mode((1366, 768))
 pygame.display.set_caption("Visualize")
 
@@ -68,7 +68,6 @@ while running:
                     # indexes
                     selected_piece_moves = piece.get_available_moves(board.board)
                     selected_piece = piece
-                    print(selected_piece, selected_piece_moves)
                     break
 
     # clear

@@ -1,6 +1,7 @@
 from pygai.base import AbstractBoard
 import pygame
 from itertools import product
+from copy import deepcopy
 
 class Piece:
     def __init__(self, value=0, size=(97, 97)):
@@ -315,7 +316,7 @@ class ChessBoard(AbstractBoard):
     Represents ChessBoard 
     """
 
-    def __init__(self):
+    def __init__(self, blank=False):
 
         self.turn = 0
 
@@ -328,16 +329,17 @@ class ChessBoard(AbstractBoard):
 
         # Initialize a Blank board.
         self.board = [[0 for _ in range(8)] for _ in range(8)]
-        self.board = [
-            [Rook(-5), Knight(-3), Bishop(-3), Queen(-9), King(-40), Bishop(-3), Knight(-3), Rook(-5)],
-            [Pawn(-1), Pawn(-1), Pawn(-1), Pawn(-1), Pawn(-1), Pawn(-1), Pawn(-1), Pawn(-1)],
-            [ 0,  0,  0,  0,  0 ,  0,  0,  0],
-            [ 0,  0,  0,  0,  0 ,  0,  0,  0],
-            [ 0,  0,  0,  0,  0 ,  0,  0,  0],
-            [ 0,  0,  0,  0,  0 ,  0,  0,  0],
-            [Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1)],
-            [Rook( 5), Knight( 3), Bishop( 3), Queen( 9), King( 40), Bishop( 3), Knight( 3), Rook( 5)]
-        ]
+        if not blank:
+            self.board = [
+                [Rook(-5), Knight(-3), Bishop(-3), Queen(-9), King(-40), Bishop(-3), Knight(-3), Rook(-5)],
+                [Pawn(-1), Pawn(-1), Pawn(-1), Pawn(-1), Pawn(-1), Pawn(-1), Pawn(-1), Pawn(-1)],
+                [ 0,  0,  0,  0,  0 ,  0,  0,  0],
+                [ 0,  0,  0,  0,  0 ,  0,  0,  0],
+                [ 0,  0,  0,  0,  0 ,  0,  0,  0],
+                [ 0,  0,  0,  0,  0 ,  0,  0,  0],
+                [Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1)],
+                [Rook( 5), Knight( 3), Bishop( 3), Queen( 9), King( 40), Bishop( 3), Knight( 3), Rook( 5)]
+            ]
         self.board_score = 0
 
         # Initialize piece
@@ -363,6 +365,9 @@ class ChessBoard(AbstractBoard):
         self.surface = pygame.transform.scale(pygame.image.load(image_path), size)
     
     def update_pieces_list(self):
+        self.pieces.clear()
+        self.black_pieces.clear()
+        self.white_pieces.clear()
         white_score = 0
         black_score = 0
         for index_row, row in enumerate(self.board):
@@ -384,29 +389,36 @@ class ChessBoard(AbstractBoard):
         Make move on chessboard
         """
 
+        copy_board = deepcopy(self.board)
+
         ori0, ori1 = int(origin[0]), int(origin[1])
         dest0, dest1 = int(dest[0]), int(dest[1])
 
         # i,j = i,j 
-        temp_piece = self.board[ori0][ori1]
+        temp_piece = copy_board[ori0][ori1]
 
         # i,j = y,x, Converts Index to COORD
         temp_piece.position = pygame.Vector2(dest1, dest0)
         temp_piece.index = (dest0, dest1)
 
         # i,j = i,j 
-        self.board[dest0][dest1] = temp_piece
+        copy_board[dest0][dest1] = temp_piece
         
         # i,j = i,j 
-        self.board[ori0][ori1] = 0
+        copy_board[ori0][ori1] = 0
 
         # Update these lines, to improve apps performance
-        self.pieces.clear()
-        self.update_pieces_list()
+        copy_chessboard = ChessBoard(blank=True)
+        copy_chessboard.board = copy_board
+        copy_chessboard.update_pieces_list()
+        copy_chessboard.turn += 1
+        
+        # self.pieces.clear()
+        # self.update_pieces_list()
 
-        self.turn += 1
+        # self.turn += 1
 
-        return self
+        return copy_chessboard
 
     def calculate_board_score(self):
         """Calculate current board's score"""
