@@ -1,8 +1,13 @@
 import pygame
 from engine.chess import ChessBoard
 from engine.other import ShowRedTri
+from engine.ai import MiniMaxDecision
 
 board = ChessBoard()
+
+ai = MiniMaxDecision(player1='white', player2='black', board=board)
+print(ai.get_decision('white'))
+exit()
 
 board.set_image('asset/board.png')
 
@@ -63,6 +68,7 @@ while running:
                     # indexes
                     selected_piece_moves = piece.get_available_moves(board.board)
                     selected_piece = piece
+                    print(selected_piece, selected_piece_moves)
                     break
 
     # clear

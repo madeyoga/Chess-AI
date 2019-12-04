@@ -67,7 +67,7 @@ class Pawn(Piece):
             if board[i + 1 * direction][j] == 0:
                 available_moves.append(pygame.Vector2(self.position[1] + 1 * direction, self.position[0]))
         except Exception as e:
-            print(e)
+            
             pass
 
         # takes move
@@ -77,7 +77,7 @@ class Pawn(Piece):
             if board[i + 1 * direction][j + 1] != 0 and board[i + 1 * direction][j + 1].color != self.color:
                 available_moves.append(pygame.Vector2(self.position[1] + 1 * direction, self.position[0] + 1))
         except Exception as e:
-            print(e)
+            
             pass
 
         if self.never_moved:
@@ -121,9 +121,9 @@ class King(Piece):
 class Queen(Piece):
     def __init__(self, value=9):
         super().__init__(value)
-        self.rook = Rook()
+        self.rook = Rook(value)
 
-        self.bishop = Bishop()
+        self.bishop = Bishop(value)
 
         self.set_image("./asset/chess-queen" + self.image_postfix)
     
@@ -222,7 +222,7 @@ class Bishop(Piece):
         explore_i = i + 1
         explore_j = j + 1
         if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
-            while board[explore_i][explore_j] == 0:
+            while board[explore_i][explore_j] == 0 and explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
                 available_moves.append((explore_i, explore_j))
                 explore_i += 1
                 explore_j += 1
@@ -232,7 +232,7 @@ class Bishop(Piece):
                     break
 
         try:
-            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color:
+            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color and explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
                 available_moves.append((explore_i, explore_j))
         except:
             pass
@@ -240,7 +240,7 @@ class Bishop(Piece):
         explore_i = i - 1
         explore_j = j - 1
         if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
-            while board[explore_i][explore_j] == 0:
+            while board[explore_i][explore_j] == 0 and explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
                 available_moves.append((explore_i, explore_j))
                 explore_i -= 1
                 explore_j -= 1
@@ -250,7 +250,7 @@ class Bishop(Piece):
                     break
 
         try:
-            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color:
+            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color and explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
                 available_moves.append((explore_i, explore_j))
         except:
             pass
@@ -259,8 +259,8 @@ class Bishop(Piece):
         explore_i = i - 1
         explore_j = j + 1
         if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
-            print(explore_i, explore_j)
-            while board[explore_i][explore_j] == 0:
+            
+            while board[explore_i][explore_j] == 0 and explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
                 available_moves.append((explore_i, explore_j))
                 explore_i -= 1
                 explore_j += 1
@@ -269,7 +269,7 @@ class Bishop(Piece):
                 else:
                     break
         try:
-            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color:
+            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color and explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
                 available_moves.append((explore_i, explore_j))
         except:
             pass
@@ -277,7 +277,7 @@ class Bishop(Piece):
         explore_i = i + 1
         explore_j = j - 1
         if explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
-            while board[explore_i][explore_j] == 0:
+            while board[explore_i][explore_j] == 0 and explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
                 available_moves.append((explore_i, explore_j))
                 explore_i += 1
                 explore_j -= 1
@@ -286,7 +286,7 @@ class Bishop(Piece):
                 else:
                     break
         try:
-            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color:
+            if board[explore_i][explore_j] != 0 and board[explore_i][explore_j].color != self.color and explore_i >= 0 and explore_j >= 0 and explore_i < 8 and explore_j < 8:
                 available_moves.append((explore_i, explore_j))
         except:
             pass
@@ -316,9 +316,15 @@ class ChessBoard(AbstractBoard):
     """
 
     def __init__(self):
+
+        self.turn = 0
+
         self.surface = -1
         self.position = [0, 0]
         self.pieces = []
+        
+        self.white_pieces = []
+        self.black_pieces = []
 
         # Initialize a Blank board.
         self.board = [[0 for _ in range(8)] for _ in range(8)]
@@ -332,6 +338,7 @@ class ChessBoard(AbstractBoard):
             [Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1), Pawn( 1)],
             [Rook( 5), Knight( 3), Bishop( 3), Queen( 9), King( 40), Bishop( 3), Knight( 3), Rook( 5)]
         ]
+        self.board_score = 0
 
         # Initialize piece
         self.update_pieces_list()
@@ -356,11 +363,21 @@ class ChessBoard(AbstractBoard):
         self.surface = pygame.transform.scale(pygame.image.load(image_path), size)
     
     def update_pieces_list(self):
+        white_score = 0
+        black_score = 0
         for index_row, row in enumerate(self.board):
             for index_column, piece in enumerate(row):
                 if type(piece).__name__ != 'int':
+                    if piece.color == 'black':
+                        black_score += piece.value
+                        self.black_pieces.append(piece)
+                    else:
+                        white_score += piece.value
+                        self.white_pieces.append(piece)
+
                     piece.set_position(pygame.Vector2(index_column, index_row)) 
                     self.pieces.append(piece)
+        self.board_score = white_score - black_score
 
     def make_move(self, origin, dest):
         """
@@ -372,7 +389,7 @@ class ChessBoard(AbstractBoard):
 
         # i,j = i,j 
         temp_piece = self.board[ori0][ori1]
-        
+
         # i,j = y,x, Converts Index to COORD
         temp_piece.position = pygame.Vector2(dest1, dest0)
         temp_piece.index = (dest0, dest1)
@@ -386,6 +403,47 @@ class ChessBoard(AbstractBoard):
         # Update these lines, to improve apps performance
         self.pieces.clear()
         self.update_pieces_list()
+
+        self.turn += 1
+
+        return self
+
+    def calculate_board_score(self):
+        """Calculate current board's score"""
+        
+        white_score = 0
+        black_score = 0
+
+        for piece in self.pieces:
+            if piece.color == 'black':
+                black_score += piece.value
+            else:
+                white_score += piece.value
+            
+        return abs(white_score) - abs(black_score)
+
+    def get_possible_moves(self, color=None):
+        """Returns current board possible moves."""
+
+        if color:
+            if color == 'white':
+                return self.get_movements_from(self.white_pieces)
+            return self.get_movements_from(self.black_pieces)
+
+        if self.turn % 2 == 0:
+            return self.get_movements_from(self.white_pieces)
+        return self.get_movements_from(self.black_pieces)
+
+    def get_movements_from(self, pieces):
+        available_movements = []
+        for piece in pieces:
+            movement = {
+                'index': piece.index,
+                'available_moves': piece.get_available_moves(self.board)
+            }
+            if len(movement['available_moves']) > 0:
+                available_movements.append(movement)
+        return available_movements
 
     def draw(self, win):
         """
