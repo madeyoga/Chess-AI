@@ -6,8 +6,8 @@ from engine.ai import MiniMaxDecision
 board = ChessBoard()
 
 ai = MiniMaxDecision(player1='white', player2='black', board=board)
-print(ai.get_decision('white'))
-exit()
+# print(ai.get_decision('white'))
+# exit()
 
 board.set_image('asset/board.png')
  
@@ -34,8 +34,9 @@ def is_valid_turn(piece_color, turn):
     return False
 
 running = True
+end = False
 while running:
-    pygame.time.delay(30)
+    pygame.time.delay(120)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -69,7 +70,7 @@ while running:
                     selected_piece_moves = piece.get_available_moves(board.board)
                     selected_piece = piece
                     break
-
+    
     # clear
     win.fill((255, 255, 255))
 
@@ -91,5 +92,26 @@ while running:
 
     # update
     pygame.display.update()
+
+    found_black_king = False
+    for piece in board.black_pieces:
+        if piece.value == -40:
+            found_black_king = True
+    
+    found_white_king = False
+    for piece in board.white_pieces:
+        if piece.value == 40:
+            found_white_king = True
+
+    if not found_black_king or not found_white_king:
+        end = True
+
+    if not end:
+        if turn % 2 == 0:
+            decision = ai.get_decision('white')
+        else:
+            decision = ai.get_decision('black')
+        board.make_move(decision[0]['index'], decision[0]['move'])
+        update_turn()
 
 pygame.quit()

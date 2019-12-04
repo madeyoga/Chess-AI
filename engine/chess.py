@@ -81,7 +81,7 @@ class Pawn(Piece):
             
             pass
 
-        if self.never_moved:
+        if self.never_moved and board[self.index[0] + 1 * direction][self.index[1]] == 0 and board[self.index[0] + 2 * direction][self.index[1]] == 0:
             available_moves.append(pygame.Vector2(self.position[1] + 2 * direction, self.position[0]))
         
         return available_moves 
@@ -389,36 +389,36 @@ class ChessBoard(AbstractBoard):
         Make move on chessboard
         """
 
-        copy_board = deepcopy(self.board)
+        # copy_board = deepcopy(self.board)
 
         ori0, ori1 = int(origin[0]), int(origin[1])
         dest0, dest1 = int(dest[0]), int(dest[1])
-
+        print("make move", origin, dest)
         # i,j = i,j 
-        temp_piece = copy_board[ori0][ori1]
+        temp_piece = self.board[ori0][ori1]
 
         # i,j = y,x, Converts Index to COORD
         temp_piece.position = pygame.Vector2(dest1, dest0)
         temp_piece.index = (dest0, dest1)
 
         # i,j = i,j 
-        copy_board[dest0][dest1] = temp_piece
+        self.board[dest0][dest1] = temp_piece
         
         # i,j = i,j 
-        copy_board[ori0][ori1] = 0
+        self.board[ori0][ori1] = 0
 
         # Update these lines, to improve apps performance
-        copy_chessboard = ChessBoard(blank=True)
-        copy_chessboard.board = copy_board
-        copy_chessboard.update_pieces_list()
-        copy_chessboard.turn += 1
+        # copy_chessboard = ChessBoard(blank=True)
+        # copy_chessboard.board = copy_board
+        # copy_chessboard.update_pieces_list()
+        # copy_chessboard.turn += 1
         
-        # self.pieces.clear()
-        # self.update_pieces_list()
+        self.pieces.clear()
+        self.update_pieces_list()
 
-        # self.turn += 1
+        self.turn += 1
 
-        return copy_chessboard
+        # return copy_chessboard
 
     def calculate_board_score(self):
         """Calculate current board's score"""
