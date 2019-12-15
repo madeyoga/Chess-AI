@@ -2,10 +2,17 @@ import pygame
 from engine.chess import ChessBoard
 from engine.other import ShowRedTri
 from engine.ai import MiniMaxDecision
+import time 
 
 board = ChessBoard()
 
-ai = MiniMaxDecision(player1='white', player2='black', board=board)
+ai = MiniMaxDecision(
+    player1='white', 
+    player2='black', 
+    board=board,
+    threshold=2
+    )
+
 # print(ai.get_decision('white'))
 # exit()
 
@@ -36,6 +43,7 @@ def is_valid_turn(piece_color, turn):
 running = True
 end = False
 while running:
+    time.sleep(1)
     pygame.time.delay(120)
 
     for event in pygame.event.get():
@@ -95,12 +103,12 @@ while running:
 
     found_black_king = False
     for piece in board.black_pieces:
-        if piece.value == -40:
+        if piece.value == -900:
             found_black_king = True
     
     found_white_king = False
     for piece in board.white_pieces:
-        if piece.value == 40:
+        if piece.value == 900:
             found_white_king = True
 
     if not found_black_king or not found_white_king:

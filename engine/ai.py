@@ -1,11 +1,13 @@
 import random
 
 class MiniMaxDecision:
-    def __init__(self, player1, player2, board):
+    def __init__(self, player1, player2, board, threshold=4, itter=50):
         self.player1 = player1
         self.player2 = player2
         self.board = board
-        self.threshold_limit = 3
+        self.threshold_limit = threshold
+        self.itter = itter
+        self.count_itter = 0
     
     def get_decision(self, player):
         """Returns a decision"""
@@ -15,13 +17,15 @@ class MiniMaxDecision:
 
         # Best move & score
         best_move = None
-        best_score = float('inf')
+        
         if player == self.player1:
             best_score = float('-inf')
+        else:
+            best_score = float('inf')
         
         # Get Best Possible Move with Minimax
         for movement in possible_moves:
-            for piece_move in movement['available_moves']:
+            for counter, piece_move in enumerate(movement['available_moves']):
                 curr_row, curr_col = movement['index']
                 dest_row, dest_col = piece_move
                 dest_row, dest_col = int(dest_row), int(dest_col)
@@ -36,11 +40,13 @@ class MiniMaxDecision:
                 if player == self.player1:
                     score = self.minimizer(self.board, 0)
                     if score > best_score:
+                        print("player1 best score: ", score)
                         best_score = score
                         best_move = {'index': movement['index'], 'move': piece_move}
                 else:
                     score = self.maximizer(self.board, 0)
                     if score < best_score:
+                        print("player2 best score: ", score)
                         best_score = score
                         best_move = {'index': movement['index'], 'move': piece_move}
 
@@ -59,13 +65,13 @@ class MiniMaxDecision:
         possible_moves = self.board.get_possible_moves()
         random.shuffle(possible_moves)
         
-        if current_score != 0 or len(possible_moves) == 0 or threshold >= self.threshold_limit:
+        if len(possible_moves) == 0 or threshold >= self.threshold_limit:
             return current_score
 
         highest_score = float('-inf')
         
         for movement in possible_moves:
-            for piece_move in movement['available_moves']:
+            for counter, piece_move in enumerate(movement['available_moves']):
                 curr_row, curr_col = movement['index']
                 dest_row, dest_col = piece_move
                 dest_row, dest_col = int(dest_row), int(dest_col)
@@ -85,8 +91,8 @@ class MiniMaxDecision:
                 self.board.board[dest_row][dest_col] = temp
                 self.board.update_pieces_list()
                 self.board.turn -= 1
-                
-                
+
+
         
         return highest_score
 
@@ -97,13 +103,13 @@ class MiniMaxDecision:
         possible_moves = self.board.get_possible_moves()
         random.shuffle(possible_moves)
 
-        if current_score != 0 or len(possible_moves) == 0 or threshold >= self.threshold_limit:
+        if len(possible_moves) == 0 or threshold >= self.threshold_limit:
             return current_score
 
         lowest_score = float('inf')
         
         for movement in possible_moves:    
-            for piece_move in movement['available_moves']:
+            for counter, piece_move in enumerate(movement['available_moves']):
                 curr_row, curr_col = movement['index']
                 dest_row, dest_col = piece_move
                 dest_row, dest_col = int(dest_row), int(dest_col)
@@ -123,5 +129,10 @@ class MiniMaxDecision:
                 self.board.board[dest_row][dest_col] = temp
                 self.board.update_pieces_list()
                 self.board.turn -= 1
-        
+
+                self.count_itter += 1
+
+                # if counter >= self.threshold_limit:
+                #     break
+
         return lowest_score
