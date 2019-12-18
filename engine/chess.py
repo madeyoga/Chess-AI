@@ -100,10 +100,11 @@ class Pawn(Piece):
         except Exception as e:
             
             pass
-
-        if self.never_moved and board[self.index[0] + 1 * direction][self.index[1]] == 0 and board[self.index[0] + 2 * direction][self.index[1]] == 0:
-            available_moves.append(pygame.Vector2(self.position[1] + 2 * direction, self.position[0]))
-        
+        try:
+            if self.never_moved and board[self.index[0] + 1 * direction][self.index[1]] == 0 and board[self.index[0] + 2 * direction][self.index[1]] == 0:
+                available_moves.append(pygame.Vector2(self.position[1] + 2 * direction, self.position[0]))
+        except:
+            pass
         return available_moves 
 
 class King(Piece):
@@ -518,8 +519,13 @@ class ChessBoard(AbstractBoard):
         ori0, ori1 = int(origin[0]), int(origin[1])
         dest0, dest1 = int(dest[0]), int(dest[1])
         print("make move", origin, dest)
+
         # i,j = i,j 
         temp_piece = self.board[ori0][ori1]
+
+        # Check if pawn moves
+        if temp_piece.value == -10 or temp_piece.value == 10:
+            temp_piece.never_moved = False
 
         # i,j = y,x, Converts Index to COORD
         temp_piece.position = pygame.Vector2(dest1, dest0)
@@ -585,9 +591,9 @@ class ChessBoard(AbstractBoard):
         """returns bool of board condition. game is end or not"""
 
         if self.black_king in self.black_pieces and self.white_king in self.white_pieces:
-            return True
+            return False
+        return True
             
-
     def draw(self, win):
         """
         method to draw chessboard

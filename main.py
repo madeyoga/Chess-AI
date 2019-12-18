@@ -10,7 +10,7 @@ ai = AlphaBetaPruning(
     player1='white', 
     player2='black', 
     board=board,
-    threshold=5
+    threshold=3
     )
 
 # print(ai.get_decision('white'))
@@ -59,8 +59,6 @@ while running:
 
                     # perform player move
                     board.make_move(selected_piece.index, tri.move_index)
-                    if selected_piece.value == 1 or selected_piece.value == -1:
-                        selected_piece.never_moved = False
                     
                     # Game Logic
                     update_turn()

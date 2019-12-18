@@ -177,13 +177,13 @@ class AlphaBetaPruning:
                 self.board.turn += 1
 
                 if player == self.player1:
-                    score = self.minimizer(self.board, 0)
+                    score = self.minimizer(self.board, 1)
                     if score > best_score:
                         print("player1 best score: ", score)
                         best_score = score
                         best_move = {'index': movement['index'], 'move': piece_move}
                 else:
-                    score = self.maximizer(self.board, 0)
+                    score = self.maximizer(self.board, 1)
                     if score < best_score:
                         print("player2 best score: ", score)
                         best_score = score
@@ -197,14 +197,14 @@ class AlphaBetaPruning:
 
         return best_move, best_score
     
-    def maximizer(self, board, threshold):
+    def maximizer(self, board, threshold, alpha=float('-inf'), beta=float('inf')):
         """"""
 
         current_score = self.board.calculate_board_score()
         possible_moves = self.board.get_possible_moves()
         random.shuffle(possible_moves)
         
-        if len(possible_moves) == 0 or threshold >= self.threshold_limit:
+        if board.is_finished() or len(possible_moves) == 0 or threshold >= self.threshold_limit:
             return current_score
 
         highest_score = float('-inf')
@@ -222,7 +222,7 @@ class AlphaBetaPruning:
                 self.board.update_pieces_list()
                 self.board.turn += 1
                 
-                score = self.minimizer(self.board, threshold + 1)
+                score = self.minimizer(self.board, threshold + 1, alpha, beta)
                 highest_score = max(highest_score, score)
 
                 # reset board
@@ -231,22 +231,20 @@ class AlphaBetaPruning:
                 self.board.update_pieces_list()
                 self.board.turn -= 1
 
-                if highest_score >= self.beta:
+                alpha = max(alpha, score)
+                if alpha >= beta:
                     return highest_score
-                
-                if highest_score > self.alpha:
-                    self.alpha = highest_score
         
         return highest_score
 
-    def minimizer(self, board, threshold):
+    def minimizer(self, board, threshold, alpha=float('-inf'), beta=float('inf')):
         """"""
 
         current_score = self.board.calculate_board_score()
         possible_moves = self.board.get_possible_moves()
         random.shuffle(possible_moves)
 
-        if len(possible_moves) == 0 or threshold >= self.threshold_limit:
+        if board.is_finished() or len(possible_moves) == 0 or threshold >= self.threshold_limit:
             return current_score
 
         lowest_score = float('inf')
@@ -264,7 +262,7 @@ class AlphaBetaPruning:
                 self.board.update_pieces_list()
                 self.board.turn += 1
 
-                score = self.maximizer(self.board, threshold + 1)
+                score = self.maximizer(self.board, threshold + 1, alpha, beta)
                 lowest_score = min(lowest_score, score)
 
                 # reset board
@@ -273,10 +271,8 @@ class AlphaBetaPruning:
                 self.board.update_pieces_list()
                 self.board.turn -= 1
 
-                if lowest_score <= self.alpha:
+                beta = min(beta, score)
+                if alpha >= beta:
                     return lowest_score
-
-                if lowest_score < self.beta:
-                    self.beta = lowest_score
 
         return lowest_score
