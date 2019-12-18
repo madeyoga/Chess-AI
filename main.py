@@ -1,16 +1,16 @@
 import pygame
 from engine.chess import ChessBoard
 from engine.other import ShowRedTri
-from engine.ai import MiniMaxDecision
+from engine.ai import MiniMaxDecision, AlphaBetaPruning
 import time 
 
 board = ChessBoard()
 
-ai = MiniMaxDecision(
+ai = AlphaBetaPruning(
     player1='white', 
     player2='black', 
     board=board,
-    threshold=2
+    threshold=5
     )
 
 # print(ai.get_decision('white'))

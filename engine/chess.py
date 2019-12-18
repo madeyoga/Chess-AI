@@ -448,19 +448,21 @@ class ChessBoard(AbstractBoard):
         
         self.white_pieces = []
         self.black_pieces = []
+        self.black_king = King(-900)
+        self.white_king = King(900)
 
         # Initialize a Blank board.
         self.board = [[0 for _ in range(8)] for _ in range(8)]
         if not blank:
             self.board = [
-                [Rook(-50), Knight(-30), Bishop(-30), Queen(-90), King(-900), Bishop(-30), Knight(-30), Rook(-50)],
+                [Rook(-50), Knight(-30), Bishop(-30), Queen(-90), self.black_king, Bishop(-30), Knight(-30), Rook(-50)],
                 [Pawn(-10), Pawn(-10), Pawn(-10), Pawn(-10), Pawn(-10), Pawn(-10), Pawn(-10), Pawn(-10)],
                 [ 0,  0,  0,  0,  0 ,  0,  0,  0],
                 [ 0,  0,  0,  0,  0 ,  0,  0,  0],
                 [ 0,  0,  0,  0,  0 ,  0,  0,  0],
                 [ 0,  0,  0,  0,  0 ,  0,  0,  0],
                 [Pawn( 10), Pawn( 10), Pawn( 10), Pawn( 10), Pawn( 10), Pawn( 10), Pawn( 10), Pawn( 10)],
-                [Rook( 50), Knight( 30), Bishop( 30), Queen( 90), King( 900), Bishop( 30), Knight( 30), Rook( 50)]
+                [Rook( 50), Knight( 30), Bishop( 30), Queen( 90), self.white_king, Bishop( 30), Knight( 30), Rook( 50)]
             ]
         self.board_score = 0
 
@@ -578,6 +580,13 @@ class ChessBoard(AbstractBoard):
             if len(movement['available_moves']) > 0:
                 available_movements.append(movement)
         return available_movements
+
+    def is_finished(self):
+        """returns bool of board condition. game is end or not"""
+
+        if self.black_king in self.black_pieces and self.white_king in self.white_pieces:
+            return True
+            
 
     def draw(self, win):
         """
